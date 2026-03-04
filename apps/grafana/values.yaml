@@ -10,4 +10,6 @@ datasources:
         url: http://prometheus-server.monitoring.svc.cluster.local
         isDefault: true
 
-adminPassword: "VoorSealedSecrets"
+admin:
+  existingSecret: grafana-admin
+  passwordKey: admin-password
