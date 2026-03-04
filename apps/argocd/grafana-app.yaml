@@ -24,8 +24,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-```
-
-Vim tip om de huidige bestanden te overschrijven:
-```
-ggdG   ← verwijdert alles in het bestand in één keer
