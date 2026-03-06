@@ -1,4 +1,4 @@
-# Homelab-k8s
+# homelab-k8s
 
 GitOps repository voor het k3s cluster op Proxmox. Alle manifests worden automatisch gesynchroniseerd via ArgoCD.
 
@@ -8,9 +8,11 @@ GitOps repository voor het k3s cluster op Proxmox. Alle manifests worden automat
 |------|-----|
 | [k3s](https://k3s.io) | Lightweight Kubernetes (1 control plane + 3 workers) |
 | [ArgoCD](https://argo-cd.readthedocs.io) | GitOps — sync van deze repo naar het cluster |
-| [Metallb](https://metallb.universe.tf) | LoadBalancer IP's op bare-metal (192.168.1.210–220) |
+| [Metallb](https://metallb.universe.tf) | LoadBalancer IPs op bare-metal (192.168.1.210–220) |
 | [Prometheus](https://prometheus.io) | Metrics scraping van nodes en pods |
 | [Grafana](https://grafana.com) | Dashboards op `grafana.internal` |
+| [Loki](https://grafana.com/oss/loki) | Log aggregatie — ontvangt Falco security events |
+| [Falco](https://falco.org) | Runtime security — detecteert verdacht gedrag in containers via eBPF |
 | [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) | Versleutelde secrets veilig in Git |
 
 ---
@@ -26,12 +28,15 @@ GitOps repository voor het k3s cluster op Proxmox. Alle manifests worden automat
 
 Metallb IP pool: `192.168.1.210–192.168.1.220`
 
-| Service | LoadBalancer IP |
-|---------|----------------|
-| ArgoCD | 192.168.1.211 |
-| Grafana | 192.168.1.212 |
+| Service | LoadBalancer IP | Intern domein |
+|---------|----------------|---------------|
+| ArgoCD | 192.168.1.211 | argocd.internal |
+| Grafana | 192.168.1.212 | grafana.internal |
+| Falcosidekick UI | 192.168.1.213 | falco.internal |
 
 VMs draaien als Full Clones van een Ubuntu 24.04 Cloud Image template op Proxmox (192.168.1.5).
+
+---
 
 ## Structuur
 
@@ -42,19 +47,25 @@ homelab-k8s/
 │   │   ├── metallb-app.yaml
 │   │   ├── prometheus-app.yaml
 │   │   ├── grafana-app.yaml
-│   │   └── sealed-secrets-app.yaml
+│   │   ├── sealed-secrets-app.yaml
+│   │   ├── falco-app.yaml
+│   │   └── loki-app.yaml
 │   ├── prometheus/
 │   │   └── values.yaml
-│   └── grafana/
-│       ├── values.yaml
-│       └── sealed-secret.yaml
+│   ├── grafana/
+│   │   ├── values.yaml
+│   │   └── sealed-secret.yaml
+│   ├── falco/
+│   │   └── values.yaml
+│   └── loki/
+│       └── values.yaml
 ├── infra/
 │   └── metallb/
 │       └── ipaddresspool.yaml
 └── README.md
 ```
 
-- `apps/argocd/` — ArgoCD Application manifests
+- `apps/argocd/` — ArgoCD Application manifests, één per tool
 - `apps/<tool>/` — Helm values en overige config per applicatie
 - `infra/metallb/` — IP pool config voor Metallb
 
@@ -62,24 +73,24 @@ homelab-k8s/
 
 ## Secrets
 
-Secrets worden versleuteld met [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets). Alleen de controller in het cluster kan dit ontsleutelen.
+Secrets worden versleuteld met [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets). Alleen de controller in het cluster kan ze ontsleutelen — versleutelde YAML is veilig om te committen.
 
-Nieuw secret aanmaken zonder dat in bash history achter te laten:
+Nieuw secret aanmaken zonder dat het in bash history terechtkomt:
 
 ```bash
 read -s -p "Wachtwoord: " PASS
 
-kubectl create secret generic  \
+kubectl create secret generic <naam> \
   --from-literal=admin-user='admin' \
   --from-literal=admin-password="$PASS" \
-  --namespace  \
+  --namespace <namespace> \
   --dry-run=client -o yaml > /tmp/secret.yaml
 
 unset PASS
 
 kubeseal --controller-name=sealed-secrets \
   --controller-namespace=kube-system \
-  --format yaml < /tmp/secret.yaml > apps//sealed-secret.yaml
+  --format yaml < /tmp/secret.yaml > apps/<tool>/sealed-secret.yaml
 
 rm /tmp/secret.yaml
 ```
