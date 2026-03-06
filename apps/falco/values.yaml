@@ -7,4 +7,3 @@ falcosidekick:
     enabled: true 
     service:
       type: LoadBalancer
-    existingSecret: falco-ui-credentials
