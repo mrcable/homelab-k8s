@@ -6,7 +6,7 @@ falcosidekick:
   config:
     loki:
       hostport: http://loki.monitoring.svc.cluster.local:3100
-      minimumpriority: warning
+      minimumpriority: notice
   webui:
     enabled: true 
     service:
