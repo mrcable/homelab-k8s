@@ -1,6 +1,6 @@
 # homelab-k8s
 
-GitOps repository voor het k3s cluster op Proxmox. Alle manifests worden automatisch gesynchroniseerd via ArgoCD.
+Een GitOps repository voor het k3s cluster op Proxmox in mijn homelab. Alle manifests worden automatisch gesynchroniseerd via ArgoCD.
 
 ## Stack
 
