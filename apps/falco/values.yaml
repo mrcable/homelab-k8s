@@ -8,3 +8,6 @@ falcosidekick:
     service:
       type: LoadBalancer
 
+falcosidekick:
+  webui:
+    existingSecret: falco-ui-credentials
