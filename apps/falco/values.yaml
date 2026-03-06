@@ -3,6 +3,10 @@ driver:
 
 falcosidekick:
   enabled: true
+  config:
+    loki:
+      hostport: http://loki.monitoring.svc.cluster.local:3100
+      minimumpriority: warning
   webui:
     enabled: true 
     service:
