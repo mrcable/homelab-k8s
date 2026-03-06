@@ -73,7 +73,7 @@ homelab-k8s/
 
 ## Secrets
 
-Secrets worden versleuteld met [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets). Alleen de controller in het cluster kan ze ontsleutelen — versleutelde YAML is veilig om te committen.
+Secrets worden versleuteld met [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets).
 
 Nieuw secret aanmaken zonder dat het in bash history terechtkomt:
 
