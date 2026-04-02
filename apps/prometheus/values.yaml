@@ -11,3 +11,11 @@ alertmanager:
 
 pushgateway:
   enabled: false 
+
+extraScrapeConfigs: |
+    - job_name: proxmox-host
+      static_configs:
+        - targets:
+            - 192.168.1.5:9100
+          labels:
+            instance: proxmox
